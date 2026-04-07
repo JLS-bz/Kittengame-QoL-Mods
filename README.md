@@ -30,7 +30,7 @@ Automates zebra trades with resource awareness:
 ### Installation 
 **1.** Create a new bookmark in your browser and paste the following as the URL:
 ```javascript
-javascript:(function(){var s=document.createElement("script");s.src="https://raw.githubusercontent.com/JLS-bz/Kittengame-ScriptMod-Automation-QOL-Suite/main/Kittengame-Automation-QOL.js?_="+Date.now();document.head.appendChild(s);})();
+javascript:(function(){var s=document.createElement("script");s.src="https://cdn.jsdelivr.net/gh/JLS-bz/Kittengame-ScriptMod-Automation-QOL-Suite@main/Kittengame-Automation-QOL.js?_="+Date.now();document.head.appendChild(s);})();
 ```
 
 **2.** Open Kittens Game and click the bookmark. An **Automation** tab will appear in the right panel alongside Log and Queue.
