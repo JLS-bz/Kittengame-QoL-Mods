@@ -319,47 +319,56 @@
             "</div>" +
             "<div id='tradeStatus' style='margin-top:6px; color:#888; font-size:11px;'>Idle</div><hr>";
 
-        function injectTradeStats() {
-        var tradeTab = document.getElementById("tradeTabContainer");
-        if (!tradeTab || tradeTab.style.display === "none") return;
+    function injectTradeStats() {
+    // 1. Use the Native Game Object to find the container
+    var tradeTab = gamePage.tabs.find(t => t.tabId === "Trade")?.content;
 
-        var ships = gamePage.resPool.get("ship").value;
-        var hasCaravanserai = gamePage.workshop.get("caravanserai").unlocked;
-        var tpCount = gamePage.bld.get("tradepost").val;
-        var diplomacyBonus = gamePage.prestige.getPerk("diplomacy").unlocked ? 2 : 1;
+    // 2. Safety check: only run if the tab exists and is currently visible
+    if (!tradeTab || tradeTab.style.display === "none") return;
 
-        var panels = tradeTab.querySelectorAll(".resource-table"); 
-        panels.forEach(panel => {
-            var raceName = panel.querySelector("b").innerText.toLowerCase().trim();
-            var race = gamePage.diplomacy.get(raceName);
-            if (!race) return;
+    var ships = gamePage.resPool.get("ship").value;
+    var hasCaravanserai = gamePage.workshop.get("caravanserai").unlocked;
+    var tpCount = gamePage.bld.get("tradepost").val;
+    var diplomacyBonus = gamePage.prestige.getPerk("diplomacy").unlocked ? 2 : 1;
 
-            // Success Rate calculation
-            var attitudeSpan = panel.querySelector("span[style*='color']"); 
-            if (attitudeSpan && !attitudeSpan.dataset.augmented) {
-                var base = (race.attitude === "hostile") ? 70 : 100;
-                var bonus = (hasCaravanserai && race.attitude === "hostile") ? (tpCount * 0.35 * diplomacyBonus) : 0;
-                var chance = Math.min(100, base + bonus);
-                
-                attitudeSpan.innerText += ` — ${chance.toFixed(1)}% Success`;
-                attitudeSpan.dataset.augmented = "true"; 
-            }
+    // 3. Find the panels (The game uses .resource-table or .container for these)
+    var panels = tradeTab.querySelectorAll(".resource-table"); 
+    
+    panels.forEach(panel => {
+        var nameEl = panel.querySelector("b");
+        if (!nameEl) return;
+        
+        var raceName = nameEl.innerText.toLowerCase().trim();
+        var race = gamePage.diplomacy.get(raceName);
+        if (!race) return;
 
-            // Zebra Titanium stats
-            if (raceName === "zebras") {
-                var rows = panel.querySelectorAll("tr");
-                rows.forEach(row => {
-                    if (row.innerText.includes("titanium") && !row.dataset.augmented) {
-                        var tiChance = Math.min(100, 15 + (ships * 0.35));
-                        var tiAmt = (1.5 + (ships * 0.03)).toFixed(2);
-                        
-                        var cell = row.querySelector("td:nth-child(2)");
+        // Success Rate Injection
+        var attitudeSpan = panel.querySelector("span[style*='color']"); 
+        // We check if our custom text is already there instead of using dataset
+        if (attitudeSpan && !attitudeSpan.innerText.includes("% Success")) {
+            var base = (race.attitude === "hostile") ? 70 : 100;
+            var bonus = (hasCaravanserai && race.attitude === "hostile") ? (tpCount * 0.35 * diplomacyBonus) : 0;
+            var chance = Math.min(100, base + bonus);
+            
+            attitudeSpan.innerText += ` — ${chance.toFixed(1)}% Success`;
+        }
+
+        // Titanium Logic for Zebras
+        if (raceName === "zebras") {
+            var rows = panel.querySelectorAll("tr");
+            rows.forEach(row => {
+                if (row.innerText.includes("titanium") && !row.innerText.includes("chance")) {
+                    var tiChance = Math.min(100, 15 + (ships * 0.35));
+                    var tiAmt = (1.5 + (ships * 0.03)).toFixed(2);
+                    
+                    var cell = row.querySelector("td:nth-child(2)");
+                    if (cell) {
                         cell.innerHTML = `${tiChance.toFixed(1)}% chance | ~${tiAmt} qty`;
-                        row.dataset.augmented = "true";
                     }
-                });
-            }
-        });
+                }
+            });
+        }
+    });
     }
     
     function syncSettings() {
