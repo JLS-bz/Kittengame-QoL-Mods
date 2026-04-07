@@ -40,8 +40,13 @@ Nothing to do. The bookmarklet always loads the latest version automatically eve
 
 ## Planned Features
 
+“how many farmers do I need to keep catnip production above zero in a cold winter? How many more will I need if I upgrade to solar farms? What about hydro plants?”
+@SwiftRosenthal
+
+greasemonkey
+
+change colour of capped resources to more pleasant colours
 
 ## Notes
 - Tested against Kittens Game running in-browser (kittensgame.com). May require adjustments for the Steam version.
-- The bookmarklet is safe to re-click — if the panel is already injected, it simply brings it into focus.
 - All automation runs client-side. Nothing is sent externally.

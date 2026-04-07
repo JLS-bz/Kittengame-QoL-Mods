@@ -308,7 +308,7 @@
 
         var HTML =
             "<table style='width:100%'><tr>" +
-                "<td><b style='font-size:14px;'>AutoTrade 🦓</b></td>" +
+                "<td><b style='font-size:14px;'>AutoTrade with Zebras 🦓</b></td>" +
                 "<td style='width:80px; text-align:right;'><button id='toggleAutoTrade' style='width:70px;'>Start</button></td>" +
             "</tr></table>" +
             "<div style='display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-top:8px;'>" +
@@ -319,7 +319,50 @@
             "</div>" +
             "<div id='tradeStatus' style='margin-top:6px; color:#888; font-size:11px;'>Idle</div><hr>";
 
-        function syncSettings() {
+        function injectTradeStats() {
+        var tradeTab = document.getElementById("tradeTabContainer");
+        if (!tradeTab || tradeTab.style.display === "none") return;
+
+        var ships = gamePage.resPool.get("ship").value;
+        var hasCaravanserai = gamePage.workshop.get("caravanserai").unlocked;
+        var tpCount = gamePage.bld.get("tradepost").val;
+        var diplomacyBonus = gamePage.prestige.getPerk("diplomacy").unlocked ? 2 : 1;
+
+        var panels = tradeTab.querySelectorAll(".resource-table"); 
+        panels.forEach(panel => {
+            var raceName = panel.querySelector("b").innerText.toLowerCase().trim();
+            var race = gamePage.diplomacy.get(raceName);
+            if (!race) return;
+
+            // Success Rate calculation
+            var attitudeSpan = panel.querySelector("span[style*='color']"); 
+            if (attitudeSpan && !attitudeSpan.dataset.augmented) {
+                var base = (race.attitude === "hostile") ? 70 : 100;
+                var bonus = (hasCaravanserai && race.attitude === "hostile") ? (tpCount * 0.35 * diplomacyBonus) : 0;
+                var chance = Math.min(100, base + bonus);
+                
+                attitudeSpan.innerText += ` — ${chance.toFixed(1)}% Success`;
+                attitudeSpan.dataset.augmented = "true"; 
+            }
+
+            // Zebra Titanium stats
+            if (raceName === "zebras") {
+                var rows = panel.querySelectorAll("tr");
+                rows.forEach(row => {
+                    if (row.innerText.includes("titanium") && !row.dataset.augmented) {
+                        var tiChance = Math.min(100, 15 + (ships * 0.35));
+                        var tiAmt = (1.5 + (ships * 0.03)).toFixed(2);
+                        
+                        var cell = row.querySelector("td:nth-child(2)");
+                        cell.innerHTML = `${tiChance.toFixed(1)}% chance | ~${tiAmt} qty`;
+                        row.dataset.augmented = "true";
+                    }
+                });
+            }
+        });
+    }
+    
+    function syncSettings() {
             state.seasons.spring = document.getElementById("tr_spring").checked;
             state.seasons.summer = document.getElementById("tr_summer").checked;
             state.seasons.autumn = document.getElementById("tr_autumn").checked;
@@ -327,6 +370,7 @@
         }
 
         function run() {
+            injectTradeStats();
             syncSettings();
 
             var seasonName = SEASON_NAMES[gamePage.calendar.season];
@@ -399,6 +443,8 @@
 
         return { init };
     })();
+
+    
 
 
     // --------------------------------------------------
