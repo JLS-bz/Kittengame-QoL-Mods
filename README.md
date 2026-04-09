@@ -1,4 +1,4 @@
-# Kittengame ScriptMod - Automation and QOL Suite
+# Kittengame QoL Mods
 A bookmarklet-based automation and quality-of-life suite for Kittens Game. No extensions or installations required.
 
 ## Table of Contents
